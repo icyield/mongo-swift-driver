@@ -49,6 +49,35 @@ public class MongoClient {
             throw error
         }
     }
+    
+    /**
+     * Create a new client connection to a MongoDB server. For options that are included in both the
+     * `MongoConnectionString` and the `MongoClientOptions` struct, the final value is set in descending order of
+     * priority: the value specified in `MongoClientOptions` (if non-nil), the value specified in the
+     * `MongoConnectionString`, or the default value if both are unset.
+     *
+     * - Parameters:
+     *   - connectionString: the connection string to connect to.
+     *   - eventLoopGroup: A SwiftNIO `EventLoopGroup` which the client will use for executing operations. It is the
+     *                     user's responsibility to ensure the group remains active for as long as the client does, and
+     *                     to ensure the group is properly shut down when it is no longer in use.
+     *   - options: optional `MongoClientOptions` to use for this client.
+     *
+     * - Throws:
+     *   - A `MongoError.InvalidArgumentError` if the connection string passed in is improperly formatted.
+     *   - A `MongoError.InvalidArgumentError` if the connection string specifies the use of TLS but libmongoc was not
+     *     built with TLS support.
+     */
+    public init(_ connectionString: MongoConnectionString, using eventLoopGroup: MultiThreadedEventLoopGroup, options: MongoClientOptions? = nil) throws {
+        //let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 5)
+        do {
+            self.asyncClient = try MongoSwift.MongoClient(connectionString, using: eventLoopGroup, options: options)
+            self.eventLoopGroup = eventLoopGroup
+        } catch {
+            //try eventLoopGroup.syncShutdownGracefully()
+            throw error
+        }
+    }
 
     /**
      * Create a new client connection to a MongoDB server. For options that are included in both the connection string
